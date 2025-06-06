@@ -8,6 +8,13 @@ import torch
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
+def get_subclip(video: VideoFileClip, start: float, end: float) -> VideoFileClip:
+    """Return a subclip compatible with different moviepy versions."""
+    if hasattr(video, "subclip"):
+        return video.subclip(start, end)
+    return video.subclipped(start_time=start, end_time=end)
+
+
 def select_video_gui() -> str:
     """Open a file dialog to choose a video and return its path."""
     try:
@@ -94,7 +101,7 @@ def extract_clips(
             start = seg["start"]
             end = seg["end"]
             out_path = os.path.join(output_dir, f"{prefix}_{idx + 1}.mp4")
-            subclip = video.subclip(start, end)
+            subclip = get_subclip(video, start, end)
 
             if vertical:
                 width, height = subclip.size
