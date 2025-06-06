@@ -2,6 +2,8 @@
 
 AutoEdit is a command line tool that generates short-form clips from long-form videos entirely on your local machine. The application uses [faster-whisper](https://github.com/guillaumekln/faster-whisper) to transcribe video audio, applies a local summarization model to detect interesting segments, and then exports highlight clips using `moviepy`.
 
+The script will automatically use a GPU if available. If no CUDA-enabled GPU or the necessary drivers are found, it will fall back to CPU inference, avoiding errors related to missing CUDA libraries.
+
 ## Requirements
 
 - Python 3.8+

@@ -4,6 +4,7 @@ from typing import List, Tuple, Dict
 
 from faster_whisper import WhisperModel
 from transformers import pipeline
+import torch
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
@@ -30,7 +31,8 @@ def select_video_gui() -> str:
 
 def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
     """Transcribe a video using faster-whisper."""
-    model = WhisperModel(model_name)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = WhisperModel(model_name, device=device)
     segments, _ = model.transcribe(video_path)
     return [
         {"start": seg.start, "end": seg.end, "text": seg.text}
@@ -40,14 +42,16 @@ def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
 
 def summarize_text(text: str, model_name: str = "t5-small") -> str:
     """Summarize text using a transformers pipeline."""
-    summarizer = pipeline("summarization", model=model_name)
+    device = 0 if torch.cuda.is_available() else -1
+    summarizer = pipeline("summarization", model=model_name, device=device)
     summary = summarizer(text, max_length=60, min_length=20)[0]["summary_text"]
     return summary
 
 
 def generate_title_description(text: str, model_name: str = "t5-small") -> Tuple[str, str]:
     """Generate a short title and multi-sentence description from text."""
-    summarizer = pipeline("summarization", model=model_name)
+    device = 0 if torch.cuda.is_available() else -1
+    summarizer = pipeline("summarization", model=model_name, device=device)
     title = summarizer(text, max_length=15, min_length=5)[0]["summary_text"].strip()
     description = summarizer(text, max_length=80, min_length=30)[0]["summary_text"].strip()
     return title, description
