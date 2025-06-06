@@ -1,12 +1,13 @@
 import argparse
 import os
+from typing import List, Tuple, Dict
 
 import whisperx
 from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
-def transcribe(video_path: str, model_name: str = "base"):
+def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
     """Transcribe a video using WhisperX."""
     device = "cpu"
     model = whisperx.load_model(model_name, device)
@@ -21,7 +22,7 @@ def summarize_text(text: str, model_name: str = "t5-small") -> str:
     return summary
 
 
-def generate_title_description(text: str, model_name: str = "t5-small"):
+def generate_title_description(text: str, model_name: str = "t5-small") -> Tuple[str, str]:
     """Generate a short title and multi-sentence description from text."""
     summarizer = pipeline("summarization", model=model_name)
     title = summarizer(text, max_length=15, min_length=5)[0]["summary_text"].strip()
@@ -29,7 +30,9 @@ def generate_title_description(text: str, model_name: str = "t5-small"):
     return title, description
 
 
-def find_highlight_segments(segments, summary: str, num_clips: int = 3, clip_duration: int = 30):
+def find_highlight_segments(
+    segments: List[Dict], summary: str, num_clips: int = 3, clip_duration: int = 30
+) -> List[Dict]:
     """Select highlight segments based on overlap with summary words."""
     summary_words = set(summary.lower().split())
     scored = []
@@ -49,20 +52,14 @@ def find_highlight_segments(segments, summary: str, num_clips: int = 3, clip_dur
     return highlights
 
 
-def extract_clips(video_path: str, segments, output_dir: str, prefix: str = "clip"):
-    """Extract video clips and return their file paths with text."""
-=======
 def extract_clips(
     video_path: str,
-    segments,
+    segments: List[Dict],
     output_dir: str,
     prefix: str = "clip",
-    aspect: str = "original",
     vertical: bool = False,
-):
+) -> List[Tuple[str, str]]:
     """Export highlight clips optionally cropped/resized to 9:16."""
-
-main
     os.makedirs(output_dir, exist_ok=True)
     outputs = []
     with VideoFileClip(video_path) as video:
@@ -72,7 +69,7 @@ main
             out_path = os.path.join(output_dir, f"{prefix}_{idx + 1}.mp4")
             subclip = video.subclip(start, end)
 
-            if vertical or aspect == "9:16":
+            if vertical:
                 width, height = subclip.size
                 if width / height > 9 / 16:
                     new_width = int(height * 9 / 16)
@@ -87,15 +84,21 @@ main
     return outputs
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Generate highlight clips from a video using WhisperX")
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Generate highlight clips from a video using WhisperX"
+    )
     parser.add_argument("video", help="Input video file")
     parser.add_argument("--output-dir", default="shorts", help="Directory to store clips")
     parser.add_argument("--model", default="base", help="Whisper model name or path")
     parser.add_argument("--summary-model", default="t5-small", help="Summarization model")
     parser.add_argument("--num-clips", type=int, default=3, help="Number of highlight clips")
-    parser.add_argument("--clip-duration", type=int, default=30, help="Length of each clip in seconds")
-    parser.add_argument("--vertical", action="store_true", help="Export clips in vertical 9:16 aspect")
+    parser.add_argument(
+        "--clip-duration", type=int, default=30, help="Length of each clip in seconds"
+    )
+    parser.add_argument(
+        "--vertical", action="store_true", help="Export clips in vertical 9:16 aspect"
+    )
     args = parser.parse_args()
 
     segments = transcribe(args.video, args.model)
@@ -105,18 +108,19 @@ def main():
     print("Video Title:", title)
     print("Video Description:", description, "\n")
 
-    highlights = find_highlight_segments(segments, summary, args.num_clips, args.clip_duration)
+    highlights = find_highlight_segments(
+        segments, summary, args.num_clips, args.clip_duration
+    )
 
-    clips = extract_clips(args.video, highlights, args.output_dir)
+    clips = extract_clips(
+        args.video, highlights, args.output_dir, vertical=args.vertical
+    )
 
     for path, clip_text in clips:
         c_title, c_desc = generate_title_description(clip_text, args.summary_model)
         print(f"Clip: {path}")
         print("Title:", c_title)
         print("Description:", c_desc, "\n")
-=======
-    extract_clips(args.video, highlights, args.output_dir, vertical=args.vertical)
-
 
 
 if __name__ == "__main__":
