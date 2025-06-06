@@ -40,7 +40,7 @@ export enum AppStep {
   ConfigureClip,
 }
 
-// For Gemini API response parsing for grounding
+// Structures for potential grounding information returned by AI models
 export interface GroundingChunkWeb {
   uri?: string;
   title?: string;
@@ -55,7 +55,7 @@ export interface GroundingChunk {
   // Other potential grounding chunk types can be added here
 }
 
-// For parsing Gemini's structured response for segments
+// For parsing structured segment suggestions
 export interface RawSegmentSuggestion {
   title: string;
   startCue: string;
