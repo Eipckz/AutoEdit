@@ -1,0 +1,4 @@
+whisperx
+transformers
+moviepy
+torch
