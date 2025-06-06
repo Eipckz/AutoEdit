@@ -2,16 +2,19 @@ import argparse
 import os
 from typing import List, Tuple, Dict
 
-import whisper
+from faster_whisper import WhisperModel
 from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
 def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
-    """Transcribe a video using OpenAI Whisper."""
-    model = whisper.load_model(model_name)
-    result = model.transcribe(video_path)
-    return result["segments"]
+    """Transcribe a video using faster-whisper."""
+    model = WhisperModel(model_name)
+    segments, _ = model.transcribe(video_path)
+    return [
+        {"start": seg.start, "end": seg.end, "text": seg.text}
+        for seg in segments
+    ]
 
 
 def summarize_text(text: str, model_name: str = "t5-small") -> str:
