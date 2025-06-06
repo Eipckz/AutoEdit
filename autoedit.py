@@ -21,6 +21,14 @@ def summarize_text(text: str, model_name: str = "t5-small") -> str:
     return summary
 
 
+def generate_title_description(text: str, model_name: str = "t5-small"):
+    """Generate a short title and multi-sentence description from text."""
+    summarizer = pipeline("summarization", model=model_name)
+    title = summarizer(text, max_length=15, min_length=5)[0]["summary_text"].strip()
+    description = summarizer(text, max_length=80, min_length=30)[0]["summary_text"].strip()
+    return title, description
+
+
 def find_highlight_segments(segments, summary: str, num_clips: int = 3, clip_duration: int = 30):
     """Select highlight segments based on overlap with summary words."""
     summary_words = set(summary.lower().split())
@@ -37,10 +45,13 @@ def find_highlight_segments(segments, summary: str, num_clips: int = 3, clip_dur
             break
         start = seg["start"]
         end = min(seg["end"], start + clip_duration)
-        highlights.append((start, end))
+        highlights.append({"start": start, "end": end, "text": seg["text"]})
     return highlights
 
 
+def extract_clips(video_path: str, segments, output_dir: str, prefix: str = "clip"):
+    """Extract video clips and return their file paths with text."""
+=======
 def extract_clips(
     video_path: str,
     segments,
@@ -51,9 +62,13 @@ def extract_clips(
 ):
     """Export highlight clips optionally cropped/resized to 9:16."""
 
+main
     os.makedirs(output_dir, exist_ok=True)
+    outputs = []
     with VideoFileClip(video_path) as video:
-        for idx, (start, end) in enumerate(segments):
+        for idx, seg in enumerate(segments):
+            start = seg["start"]
+            end = seg["end"]
             out_path = os.path.join(output_dir, f"{prefix}_{idx + 1}.mp4")
             subclip = video.subclip(start, end)
 
@@ -68,6 +83,8 @@ def extract_clips(
                 subclip = subclip.resize(height=1080)
 
             subclip.write_videofile(out_path, codec="libx264", audio_codec="aac")
+            outputs.append((out_path, seg["text"]))
+    return outputs
 
 
 def main():
@@ -84,8 +101,22 @@ def main():
     segments = transcribe(args.video, args.model)
     text = " ".join(seg["text"] for seg in segments)
     summary = summarize_text(text, args.summary_model)
+    title, description = generate_title_description(summary, args.summary_model)
+    print("Video Title:", title)
+    print("Video Description:", description, "\n")
+
     highlights = find_highlight_segments(segments, summary, args.num_clips, args.clip_duration)
+
+    clips = extract_clips(args.video, highlights, args.output_dir)
+
+    for path, clip_text in clips:
+        c_title, c_desc = generate_title_description(clip_text, args.summary_model)
+        print(f"Clip: {path}")
+        print("Title:", c_title)
+        print("Description:", c_desc, "\n")
+=======
     extract_clips(args.video, highlights, args.output_dir, vertical=args.vertical)
+
 
 
 if __name__ == "__main__":

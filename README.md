@@ -29,6 +29,7 @@ This will:
 1. Transcribe the video locally with WhisperX.
 2. Summarize the transcript to identify highlight segments.
 3. Export short clips into the `shorts` directory.
+4. Generate a short title and multi-sentence description for each clip using the summarization model.
 
 ### Options
 
@@ -41,4 +42,6 @@ This will:
 ## Notes
 
 The summarization and transcription models are loaded locally, so large model files may be downloaded beforehand. Ensure you have enough disk space and GPU/CPU resources for processing.
+When clips are generated, their titles and descriptions are printed to the console so you can easily reuse them.
 If you enable `--vertical`, the exported clips will be cropped or resized to a 9:16 aspect ratio.
+
