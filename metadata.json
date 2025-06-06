@@ -1,5 +1,5 @@
 {
   "name": "Local Video Clipper AI",
-  "description": "An application to help identify key moments in videos by analyzing their transcripts, suggest clips, and configure settings like aspect ratio and captions. This UI concept is designed for workflows where heavy AI processing (like transcription and video rendering) is handled by the user's local tools. The transcript analysis is performed locally.",
+  "description": "An application to help identify key moments in videos by analyzing their transcripts, suggest clips, and configure settings like aspect ratio and captions. Transcription is performed locally using Whisper and the transcript analysis is done locally as well. Video rendering still relies on your own tools.",
   "requestFramePermissions": []
 }
