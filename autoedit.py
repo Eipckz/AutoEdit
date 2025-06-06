@@ -2,15 +2,14 @@ import argparse
 import os
 from typing import List, Tuple, Dict
 
-import whisperx
+import whisper
 from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
 def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
-    """Transcribe a video using WhisperX."""
-    device = "cpu"
-    model = whisperx.load_model(model_name, device)
+    """Transcribe a video using OpenAI Whisper."""
+    model = whisper.load_model(model_name)
     result = model.transcribe(video_path)
     return result["segments"]
 
@@ -86,7 +85,7 @@ def extract_clips(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Generate highlight clips from a video using WhisperX"
+        description="Generate highlight clips from a video using OpenAI Whisper"
     )
     parser.add_argument("video", help="Input video file")
     parser.add_argument("--output-dir", default="shorts", help="Directory to store clips")
