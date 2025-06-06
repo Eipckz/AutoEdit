@@ -7,6 +7,27 @@ from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
+def select_video_gui() -> str:
+    """Open a file dialog to choose a video and return its path."""
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+    except Exception:
+        return ""
+
+    root = tk.Tk()
+    root.withdraw()
+    path = filedialog.askopenfilename(
+        title="Select video file",
+        filetypes=[
+            ("Video files", "*.mp4 *.mov *.mkv *.avi *.flv *.webm"),
+            ("All files", "*.*"),
+        ],
+    )
+    root.destroy()
+    return path
+
+
 def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
     """Transcribe a video using faster-whisper."""
     model = WhisperModel(model_name)
@@ -90,7 +111,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate highlight clips from a video using OpenAI Whisper"
     )
-    parser.add_argument("video", help="Input video file")
+    parser.add_argument("video", nargs="?", help="Input video file")
     parser.add_argument("--output-dir", default="shorts", help="Directory to store clips")
     parser.add_argument("--model", default="base", help="Whisper model name or path")
     parser.add_argument("--summary-model", default="t5-small", help="Summarization model")
@@ -101,7 +122,16 @@ def main() -> None:
     parser.add_argument(
         "--vertical", action="store_true", help="Export clips in vertical 9:16 aspect"
     )
+    parser.add_argument(
+        "--gui", action="store_true", help="Open a file chooser to select the video"
+    )
     args = parser.parse_args()
+
+    if args.gui or not args.video:
+        args.video = select_video_gui()
+        if not args.video:
+            print("No video selected.")
+            return
 
     segments = transcribe(args.video, args.model)
     text = " ".join(seg["text"] for seg in segments)
