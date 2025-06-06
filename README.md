@@ -1,12 +1,12 @@
 # AutoEdit
 
-AutoEdit is a command line tool that generates short-form clips from long-form videos entirely on your local machine. The application uses [OpenAI Whisper](https://github.com/openai/whisper) to transcribe video audio, applies a local summarization model to detect interesting segments, and then exports highlight clips using `moviepy`.
+AutoEdit is a command line tool that generates short-form clips from long-form videos entirely on your local machine. The application uses [faster-whisper](https://github.com/guillaumekln/faster-whisper) to transcribe video audio, applies a local summarization model to detect interesting segments, and then exports highlight clips using `moviepy`.
 
 ## Requirements
 
 - Python 3.8+
 - `ffmpeg` installed and available on your `PATH`
-- Python packages listed in `requirements.txt`
+- Python packages listed in `requirements.txt` (includes `faster-whisper`)
 
 Install dependencies with:
 
@@ -26,7 +26,7 @@ python autoedit.py path/to/video.mp4 --output-dir shorts --vertical
 
 This will:
 
-1. Transcribe the video locally with OpenAI Whisper.
+1. Transcribe the video locally with faster-whisper.
 2. Summarize the transcript to identify highlight segments.
 3. Export short clips into the `shorts` directory.
 4. Generate a short title and multi-sentence description for each clip using the summarization model.
