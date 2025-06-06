@@ -20,6 +20,8 @@ Run the script with a video file:
 
 ```bash
 python autoedit.py path/to/video.mp4 --output-dir shorts
+# use --vertical to export 9:16 clips
+python autoedit.py path/to/video.mp4 --output-dir shorts --vertical
 ```
 
 This will:
@@ -34,7 +36,9 @@ This will:
 - `--summary-model` – summarization model (default `t5-small`).
 - `--num-clips` – number of highlight clips to produce (default `3`).
 - `--clip-duration` – length of each highlight in seconds (default `30`).
+- `--vertical` – export clips cropped/resized to 9:16 vertical aspect.
 
 ## Notes
 
 The summarization and transcription models are loaded locally, so large model files may be downloaded beforehand. Ensure you have enough disk space and GPU/CPU resources for processing.
+If you enable `--vertical`, the exported clips will be cropped or resized to a 9:16 aspect ratio.
