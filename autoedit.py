@@ -1,10 +1,28 @@
 import argparse
 import os
 from typing import List, Tuple, Dict
+import tkinter as tk
+from tkinter import filedialog, messagebox
 
 import whisperx
 from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
+
+
+def select_video_file() -> str:
+    """Open a file dialog for the user to choose a video file."""
+    root = tk.Tk()
+    root.withdraw()
+    root.update()
+    path = filedialog.askopenfilename(
+        title="Select a video file",
+        filetypes=[("Video files", "*.mp4 *.mov *.mkv *.avi"), ("All files", "*.*")],
+    )
+    root.destroy()
+    if not path:
+        messagebox.showinfo("AutoEdit", "No file selected. Exiting.")
+        raise SystemExit(0)
+    return path
 
 
 def transcribe(video_path: str, model_name: str = "base") -> List[Dict]:
@@ -88,7 +106,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Generate highlight clips from a video using WhisperX"
     )
-    parser.add_argument("video", help="Input video file")
+    parser.add_argument("video", nargs="?", help="Input video file")
     parser.add_argument("--output-dir", default="shorts", help="Directory to store clips")
     parser.add_argument("--model", default="base", help="Whisper model name or path")
     parser.add_argument("--summary-model", default="t5-small", help="Summarization model")
@@ -100,6 +118,9 @@ def main() -> None:
         "--vertical", action="store_true", help="Export clips in vertical 9:16 aspect"
     )
     args = parser.parse_args()
+
+    if not args.video:
+        args.video = select_video_file()
 
     segments = transcribe(args.video, args.model)
     text = " ".join(seg["text"] for seg in segments)

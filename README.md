@@ -24,6 +24,13 @@ python autoedit.py path/to/video.mp4 --output-dir shorts
 python autoedit.py path/to/video.mp4 --output-dir shorts --vertical
 ```
 
+If you omit the video path, a small file chooser window will open so you can
+select a video interactively:
+
+```bash
+python autoedit.py
+```
+
 This will:
 
 1. Transcribe the video locally with WhisperX.
