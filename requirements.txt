@@ -1,4 +1,4 @@
-whisperx
+openai-whisper
 transformers
 moviepy
 torch
