@@ -1,6 +1,8 @@
 import argparse
 import os
 
+from typing import Optional
+
 import whisperx
 from transformers import pipeline
 from moviepy.video.io.VideoFileClip import VideoFileClip
@@ -41,11 +43,22 @@ def find_highlight_segments(segments, summary: str, num_clips: int = 3, clip_dur
     return highlights
 
 
-def extract_clips(video_path: str, segments, output_dir: str, prefix: str = "clip"):
+def extract_clips(
+    video_path: str,
+    segments,
+    output_dir: str,
+    prefix: str = "clip",
+    ext: Optional[str] = None,
+):
+    """Extract highlight clips from the video with optional extension."""
     os.makedirs(output_dir, exist_ok=True)
+    if not ext:
+        ext = os.path.splitext(video_path)[1] or ".mp4"
+    if not ext.startswith("."):
+        ext = "." + ext
     with VideoFileClip(video_path) as video:
         for idx, (start, end) in enumerate(segments):
-            out_path = os.path.join(output_dir, f"{prefix}_{idx + 1}.mp4")
+            out_path = os.path.join(output_dir, f"{prefix}_{idx + 1}{ext}")
             subclip = video.subclip(start, end)
             subclip.write_videofile(out_path, codec="libx264", audio_codec="aac")
 
@@ -54,6 +67,13 @@ def main():
     parser = argparse.ArgumentParser(description="Generate highlight clips from a video using WhisperX")
     parser.add_argument("video", help="Input video file")
     parser.add_argument("--output-dir", default="shorts", help="Directory to store clips")
+    parser.add_argument(
+        "--output-ext",
+        default=None,
+        help=(
+            "Extension for output clips (e.g. mp4, mkv). Defaults to the input video extension."
+        ),
+    )
     parser.add_argument("--model", default="base", help="Whisper model name or path")
     parser.add_argument("--summary-model", default="t5-small", help="Summarization model")
     parser.add_argument("--num-clips", type=int, default=3, help="Number of highlight clips")
@@ -64,7 +84,7 @@ def main():
     text = " ".join(seg["text"] for seg in segments)
     summary = summarize_text(text, args.summary_model)
     highlights = find_highlight_segments(segments, summary, args.num_clips, args.clip_duration)
-    extract_clips(args.video, highlights, args.output_dir)
+    extract_clips(args.video, highlights, args.output_dir, ext=args.output_ext)
 
 
 if __name__ == "__main__":
